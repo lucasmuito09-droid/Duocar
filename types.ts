@@ -14,6 +14,7 @@ export interface User {
   healthScore: number;
   role: Role;
   lastServiceDate?: string;
+  photo?: string;
 }
 
 export interface Service {

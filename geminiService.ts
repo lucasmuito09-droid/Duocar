@@ -9,24 +9,25 @@ const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 export const getCarCareAdvice = async (user: User) => {
   try {
     const prompt = `
-      Você é o "Especialista Duocar", um consultor de estética automotiva amigável, educador e empático.
+      Você é o "Especialista Duocar". Sua missão é converter o score de saúde do carro em uma ação de agendamento usando EMOÇÃO.
       
       CONTEXTO:
       - Cliente: ${user.name}
-      - Veículo: ${user.vehicleModel} (${user.vehicleSize})
+      - Veículo: ${user.vehicleModel}
       - Score de Saúde: ${user.healthScore}/100.
       
-      DIRETRIZES:
-      - Use psicologia emocional: "Cuidar do seu carro é cuidar do seu bem-estar".
-      - Seja educativo: explique POR QUE o cuidado é importante (valorização, proteção, conforto).
-      - Se o score for baixo (<40), use um tom de preocupação amigável.
-      - Se o score for alto (>80), parabenize.
-      - Forneça conselhos curtos.
+      REGRAS DE OURO (Siga rigorosamente):
+      1. NUNCA use listas, tópicos ou textos longos.
+      2. Máximo de 250 caracteres (aproximadamente 2 a 3 frases curtas).
+      3. Seja persuasivo: Se o score for baixo (${user.healthScore}%), fale sobre "resgatar o orgulho" ou "proteger seu investimento".
+      4. Termine com uma pergunta instigante ou convite para tirar dúvida.
+      
+      EXEMPLO DE TOM:
+      "Olá ${user.name}! Notei que seu ${user.vehicleModel} está com a saúde em ${user.healthScore}%. Cuidar da estética é mais que beleza, é valorizar seu patrimônio e seu bem-estar. Que tal tirarmos suas dúvidas sobre o melhor tratamento para ele agora?"
 
-      Responda em português.
+      Responda em português de forma direta e calorosa.
     `;
 
-    // Removed maxOutputTokens as it requires thinkingBudget for Gemini 3 series models
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: prompt,
@@ -38,7 +39,7 @@ export const getCarCareAdvice = async (user: User) => {
     return response.text || "Manter seu carro limpo é preservar o valor do seu patrimônio.";
   } catch (error) {
     console.error("Error fetching Gemini advice:", error);
-    return "Um carro bem cuidado reflete o carinho que você tem por si mesmo. Vamos manter o brilho em dia?";
+    return "Seu carro reflete quem você é. Vamos devolver o brilho que ele merece hoje?";
   }
 };
 
@@ -51,13 +52,12 @@ export const askSpecialist = async (user: User, question: string) => {
       PERGUNTA: "${question}"
       
       REGRAS:
-      - Seja breve, técnico mas acessível.
-      - Sempre foque em preservação e estética.
-      - Se ele perguntar sobre algo que não fazemos, sugira o serviço mais próximo da nossa lista: ${SERVICES.map(s => s.name).join(', ')}.
-      - Use um tom encorajador.
+      - Seja breve (máximo 3 frases).
+      - Resposta técnica mas acessível.
+      - Se a dúvida envolver um problema, sugira o serviço ideal da nossa lista: ${SERVICES.map(s => s.name).join(', ')}.
+      - Tom encorajador e profissional.
     `;
 
-    // Removed maxOutputTokens as it requires thinkingBudget for Gemini 3 series models
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: prompt,
@@ -79,18 +79,16 @@ export const getQuizRecommendation = async (user: User, quizData: Record<string,
     const serviceList = SERVICES.map(s => `- ${s.name} (ID: ${s.id})`).join('\n');
 
     const prompt = `
-      Você é o especialista técnico da Duocar. O cliente respondeu um quiz de diagnóstico.
+      Você é o especialista técnico da Duocar.
+      Com base no diagnóstico do ${user.vehicleModel}, dê um veredito curto e persuasivo.
       
-      DADOS DO VEÍCULO: ${user.vehicleModel} (${user.vehicleSize})
-      RESPOSTAS DO QUIZ:
+      DADOS:
       ${quizSummary}
       
-      SERVIÇOS DISPONÍVEIS:
+      RECOMENDE UM DESTES:
       ${serviceList}
       
-      OBJETIVO:
-      Identifique a maior "dor" do cliente e recomende o serviço ideal com base no quiz.
-      Seja breve e use um tom de "Veredito Amigável".
+      REGRAS: Máximo 2 frases. Seja direto na solução.
     `;
 
     const response = await ai.models.generateContent({
