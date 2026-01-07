@@ -1,9 +1,8 @@
 
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 import { User, Booking, Service } from "./types";
 import { SERVICES } from "./constants";
 
-// Always use process.env.API_KEY directly for initialization
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export const getCarCareAdvice = async (user: User) => {
@@ -22,9 +21,6 @@ export const getCarCareAdvice = async (user: User) => {
       3. Seja persuasivo: Se o score for baixo (${user.healthScore}%), fale sobre "resgatar o orgulho" ou "proteger seu investimento".
       4. Termine com uma pergunta instigante ou convite para tirar dúvida.
       
-      EXEMPLO DE TOM:
-      "Olá ${user.name}! Notei que seu ${user.vehicleModel} está com a saúde em ${user.healthScore}%. Cuidar da estética é mais que beleza, é valorizar seu patrimônio e seu bem-estar. Que tal tirarmos suas dúvidas sobre o melhor tratamento para ele agora?"
-
       Responda em português de forma direta e calorosa.
     `;
 
@@ -40,6 +36,64 @@ export const getCarCareAdvice = async (user: User) => {
   } catch (error) {
     console.error("Error fetching Gemini advice:", error);
     return "Seu carro reflete quem você é. Vamos devolver o brilho que ele merece hoje?";
+  }
+};
+
+export const getQuizRecommendation = async (user: User, quizAnswers: Record<string, string>) => {
+  try {
+    const quizSummary = Object.entries(quizAnswers).map(([q, a]) => `${q}: ${a}`).join('\n');
+    const availableServices = SERVICES.map(s => `- ${s.name} (ID: ${s.id})`).join('\n');
+
+    const prompt = `
+      Você é o Consultor Técnico Sênior da Duocar Estética Automotiva.
+      Analise o diagnóstico de 10 perguntas do veículo do cliente e recomende o serviço IDEAL.
+      
+      DADOS DO CLIENTE:
+      Nome: ${user.name}
+      Veículo: ${user.vehicleModel}
+      Tamanho: ${user.vehicleSize}
+      
+      RESPOSTAS DO DIAGNÓSTICO:
+      ${quizSummary}
+      
+      SERVIÇOS DISPONÍVEIS NA DUOCAR:
+      ${availableServices}
+      
+      SUA TAREFA:
+      1. Forneça um veredito técnico curto e impactante (máximo 150 caracteres).
+      2. Identifique o ID exato do serviço mais recomendado da lista acima.
+      
+      Responda ESTRITAMENTE no formato JSON abaixo:
+      {
+        "analysis": "Seu veredito aqui...",
+        "recommendedServiceId": "ID_DO_SERVICO"
+      }
+    `;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3-pro-preview",
+      contents: prompt,
+      config: {
+        temperature: 0.7,
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            analysis: { type: Type.STRING },
+            recommendedServiceId: { type: Type.STRING }
+          },
+          required: ["analysis", "recommendedServiceId"]
+        }
+      }
+    });
+
+    return JSON.parse(response.text || "{}");
+  } catch (error) {
+    console.error("Error in Quiz AI:", error);
+    return { 
+      analysis: "Seu veículo precisa de uma atenção profissional completa para retomar o brilho.", 
+      recommendedServiceId: "lavagem_essencial" 
+    };
   }
 };
 
@@ -70,38 +124,5 @@ export const askSpecialist = async (user: User, question: string) => {
   } catch (error) {
     console.error("Error asking Gemini:", error);
     return "Desculpe, estou processando muitas informações. Pode repetir a pergunta ou nos chamar no WhatsApp?";
-  }
-};
-
-export const getQuizRecommendation = async (user: User, quizData: Record<string, string>) => {
-  try {
-    const quizSummary = Object.entries(quizData).map(([q, a]) => `- ${q}: ${a}`).join('\n');
-    const serviceList = SERVICES.map(s => `- ${s.name} (ID: ${s.id})`).join('\n');
-
-    const prompt = `
-      Você é o especialista técnico da Duocar.
-      Com base no diagnóstico do ${user.vehicleModel}, dê um veredito curto e persuasivo.
-      
-      DADOS:
-      ${quizSummary}
-      
-      RECOMENDE UM DESTES:
-      ${serviceList}
-      
-      REGRAS: Máximo 2 frases. Seja direto na solução.
-    `;
-
-    const response = await ai.models.generateContent({
-      model: "gemini-3-pro-preview",
-      contents: prompt,
-      config: {
-        temperature: 0.7,
-      }
-    });
-
-    return response.text?.trim() || "Seu carro merece um cuidado especial para brilhar como novo!";
-  } catch (error) {
-    console.error("Error in Quiz AI:", error);
-    return "Seu carro precisa de uma atenção especial. Agende uma avaliação agora!";
   }
 };

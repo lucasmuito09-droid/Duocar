@@ -1,8 +1,15 @@
 
-export type Role = 'cliente' | 'admin';
 export type VehicleSize = 'Pequeno' | 'Médio' | 'Grande';
 export type BookingStatus = 'Agendado' | 'Em Execução' | 'Concluído' | 'Cancelado';
 export type LoyaltyLevel = 'Bronze' | 'Prata' | 'Ouro' | 'Diamante';
+
+export interface AppNotification {
+  id: string;
+  message: string;
+  bookingId: string;
+  resolved: boolean;
+  type: 'review_request';
+}
 
 export interface User {
   id: string;
@@ -12,9 +19,9 @@ export interface User {
   vehicleModel: string;
   vehicleSize: VehicleSize;
   healthScore: number;
-  role: Role;
   lastServiceDate?: string;
   photo?: string;
+  notifications?: AppNotification[];
 }
 
 export interface Service {
@@ -24,6 +31,8 @@ export interface Service {
   price: Record<VehicleSize, number>;
   healthImpact: number;
   recommendedAfterDays?: number;
+  description?: string;
+  duration?: string;
 }
 
 export interface Booking {
@@ -59,4 +68,16 @@ export interface AppConfig {
     secondaryColor: string;
     background: string;
   };
+  blockedSlots: string[]; // Formato: "YYYY-MM-DD_HH:mm"
+  homeTexts: {
+    noService: { title: string; subtitle: string; progress: number };
+    inProgress: { title: string; subtitle: string; progress: number };
+    pendingReview: { title: string; subtitle: string; progress: number };
+    completed: { title: string; subtitle: string; progress: number };
+  };
+}
+
+export interface ChatMessage {
+  role: 'user' | 'specialist';
+  text: string;
 }
