@@ -70,10 +70,10 @@ export interface AppConfig {
   };
   blockedSlots: string[]; // Formato: "YYYY-MM-DD_HH:mm"
   homeTexts: {
-    noService: { title: string; subtitle: string; progress: number };
-    inProgress: { title: string; subtitle: string; progress: number };
-    pendingReview: { title: string; subtitle: string; progress: number };
-    completed: { title: string; subtitle: string; progress: number };
+    noService: { title: string; subtitle: string };
+    inProgress: { title: string; subtitle: string };
+    pendingReview: { title: string; subtitle: string };
+    completed: { title: string; subtitle: string };
   };
 }
 

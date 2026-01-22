@@ -966,19 +966,6 @@ export default function App() {
                             homeTexts: { ...prev.homeTexts, [key]: { ...prev.homeTexts[key], subtitle: e.target.value } }
                           }))}
                         />
-                        <div className="flex items-center gap-3">
-                           <label className="text-[10px] font-black text-zinc-400 uppercase">Progresso:</label>
-                           <input 
-                             type="number" 
-                             className="w-20 p-2 rounded-lg bg-white border-none font-black text-xs text-center"
-                             value={appConfig.homeTexts[key].progress}
-                             onChange={(e) => setAppConfig(prev => ({
-                               ...prev,
-                               homeTexts: { ...prev.homeTexts, [key]: { ...prev.homeTexts[key], progress: Number(e.target.value) } }
-                             }))}
-                           />
-                           <span className="text-xs font-black text-zinc-400">%</span>
-                        </div>
                       </div>
                     </div>
                   ))}
@@ -1040,7 +1027,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* SALES ORIENTED HEALTH CARD */}
+            {/* SALES ORIENTED HEALTH CARD - Now with dynamic impact health score */}
             <div className="bg-white rounded-[2.5rem] p-8 border border-zinc-100 premium-shadow hover-lift">
               <div className="space-y-5 mb-8">
                 <div className="flex justify-between items-center">
@@ -1049,7 +1036,8 @@ export default function App() {
                     <p className="text-xs font-medium text-zinc-400">{displayTexts.subtitle}</p>
                   </div>
                 </div>
-                <HealthBar score={displayTexts.progress} />
+                {/* Score rises according to real service impact */}
+                <HealthBar score={currentHealthScore} />
               </div>
               <div className="flex gap-4">
                 <button 

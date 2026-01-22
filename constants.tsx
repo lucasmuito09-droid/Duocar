@@ -13,23 +13,19 @@ export const CONFIG: AppConfig = {
   homeTexts: {
     noService: { 
       title: "Seu carro precisa de cuidados", 
-      subtitle: "Uma lavagem correta aumenta a vida útil do veículo.",
-      progress: 0
+      subtitle: "Uma lavagem correta aumenta a vida útil do veículo."
     },
     inProgress: { 
       title: "Cuidado em progresso", 
-      subtitle: "Seu carro já está recebendo atenção profissional.",
-      progress: 40
+      subtitle: "Seu carro já está recebendo atenção profissional."
     },
     pendingReview: { 
       title: "Lavagem concluída com sucesso", 
-      subtitle: "Avalie o serviço para liberar o diagnóstico completo.",
-      progress: 70
+      subtitle: "Avalie o serviço para liberar o diagnóstico completo."
     },
     completed: { 
       title: "Veículo com manutenção em dia", 
-      subtitle: "Continue cuidando para manter o desempenho ideal.",
-      progress: 100
+      subtitle: "Continue cuidando para manter o desempenho ideal."
     }
   }
 };
